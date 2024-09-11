@@ -3,6 +3,7 @@ package com.example.englishmate
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.englishmate.databinding.FragmentHomeBinding
 import com.google.gson.Gson
 import java.io.BufferedReader
@@ -15,13 +16,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     ) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentHomeBinding.bind(view)
+
+
         val wordList = loadWordsFromJson()
-        binding.rvWords.adapter = WordAdapter(wordList.words)
-        binding.rvWords?.adapter?.notifyDataSetChanged()
+        val wordAdapter = WordAdapter(wordList.words,{
+            val action = HomeFragmentDirections.actionHomeFragmentToWordBottomSheet(it)
+            findNavController().navigate(action)
+        })
+        binding.rvWords.adapter = wordAdapter
+
 
         binding.swipeToRefresh.setOnRefreshListener {
             val newList = wordList.words.shuffled()
-            binding.rvWords.adapter = WordAdapter(newList)
+            wordAdapter.setWordLists(newList)
             binding.swipeToRefresh.isRefreshing = false
         }
     }

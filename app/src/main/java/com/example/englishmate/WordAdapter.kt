@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.englishmate.databinding.ItemWordsBinding
 
-class WordAdapter(val wordList: List<Word>) : RecyclerView.Adapter<WordAdapter.WordViewHolder>() {
+class WordAdapter(var wordList: List<Word>, val itemClick: (Word) -> Unit = {}) : RecyclerView.Adapter<WordAdapter.WordViewHolder>() {
 
 
     inner class WordViewHolder(val binding: ItemWordsBinding) : RecyclerView.ViewHolder(binding.root)
@@ -23,6 +23,15 @@ class WordAdapter(val wordList: List<Word>) : RecyclerView.Adapter<WordAdapter.W
 
     override fun onBindViewHolder(holder: WordViewHolder, position: Int) {
        holder.binding.tvWord.text = wordList[position].english
+        holder.binding.root.setOnClickListener {
+            itemClick(wordList[position])
+        }
+    }
+
+    // Yeni kelime listesini ayarlamak için bir fonksiyon ekliyoruz
+    fun setWordLists(newWordList: List<Word>) {
+        wordList = newWordList
+        notifyDataSetChanged() // Liste güncellendiğini bildir
     }
 
 

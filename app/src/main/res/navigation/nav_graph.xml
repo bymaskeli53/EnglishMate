@@ -19,5 +19,9 @@
     <dialog
         android:id="@+id/wordBottomSheet"
         android:name="com.example.englishmate.WordBottomSheet"
-        android:label="WordBottomSheet" />
+        android:label="WordBottomSheet" >
+        <argument
+            android:name="Word"
+            app:argType="com.example.englishmate.Word" />
+    </dialog>
 </navigation>
