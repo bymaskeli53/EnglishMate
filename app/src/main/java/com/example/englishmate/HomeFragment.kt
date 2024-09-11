@@ -9,14 +9,21 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentHomeBinding.bind(view)
         val wordList = loadWordsFromJson()
         binding.rvWords.adapter = WordAdapter(wordList.words)
+        binding.rvWords?.adapter?.notifyDataSetChanged()
 
-
+        binding.swipeToRefresh.setOnRefreshListener {
+            val newList = wordList.words.shuffled()
+            binding.rvWords.adapter = WordAdapter(newList)
+            binding.swipeToRefresh.isRefreshing = false
+        }
     }
 
     private fun loadWordsFromJson(): WordList {

@@ -49,6 +49,8 @@ dependencies {
 
     //Gson
     implementation("com.google.code.gson:gson:2.11.0")
+    // Swipe to refresh
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
