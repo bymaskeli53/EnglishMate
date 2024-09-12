@@ -24,7 +24,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         preferenceHelper = PreferenceHelper(requireContext())
 
         val wordList = loadWordsFromJson().words.toMutableList()
-        wordAdapter = WordAdapter(wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.toMutableList(),{
+        wordAdapter = WordAdapter(wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled().toMutableList(),{
             val action = HomeFragmentDirections.actionHomeFragmentToWordBottomSheet(it)
             findNavController().navigate(action)
         })

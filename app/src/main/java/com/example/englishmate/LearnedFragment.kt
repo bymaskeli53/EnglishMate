@@ -19,7 +19,7 @@ class LearnedFragment : Fragment(R.layout.fragment_learned) {
         val binding = FragmentLearnedBinding.bind(view)
         preferenceHelper = PreferenceHelper(requireContext())
 
-        val learnedWords = preferenceHelper.getLearnedWords().map { Word(it, "Some Translation") }.toMutableList()
+        val learnedWords = preferenceHelper.getLearnedWords().map { Word(it, it) }.toMutableList()
         wordAdapter = WordAdapter(learnedWords) { word ->
             // Unlearn işlemi
             val action = LearnedFragmentDirections.actionLearnedFragmentToLearnedBottomSheet(word)
