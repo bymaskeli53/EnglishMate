@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.englishmate.databinding.FragmentHomeBinding
 import com.google.gson.Gson
 import java.io.BufferedReader
@@ -29,6 +30,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             findNavController().navigate(action)
         })
         binding.rvWords.adapter = wordAdapter
+
+        val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        binding.rvWords.layoutManager = layoutManager
 
 
         binding.swipeToRefresh.setOnRefreshListener {
