@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.navArgs
 import com.example.englishmate.databinding.WordBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -39,8 +40,11 @@ class LearnedBottomSheet : BottomSheetDialogFragment() {
         binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 preferenceHelper.removeLearnedWord(word.english)
-                (parentFragment as? LearnedFragment)?.removeWordFromList(word)
-                (parentFragment as? HomeFragment)?.addWordToList(word)
+                //(parentFragment as? LearnedFragment)?.removeWordFromList(word)
+               // (parentFragment as? HomeFragment)?.addWordToList(word)
+                setFragmentResult("unlearned_word",Bundle().apply {
+                    putParcelable("word2",word)
+                })
                 dismiss()
             }
         }

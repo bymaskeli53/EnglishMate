@@ -3,6 +3,7 @@ package com.example.englishmate
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import com.example.englishmate.databinding.FragmentLearnedBinding
 
@@ -28,6 +29,13 @@ class LearnedFragment : Fragment(R.layout.fragment_learned) {
            // (parentFragmentManager.findFragmentById(R.id.homeFragment) as? HomeFragment)?.addWordToList(word)
         }
         binding.rvWords.adapter = wordAdapter
+
+        setFragmentResultListener("unlearned_word"){_,bundle ->
+            val unlearnedWord = bundle.getParcelable<Word>("word2")
+            if (unlearnedWord != null) {
+                removeWordFromList(unlearnedWord)
+            }
+        }
     }
 
     fun removeWordFromList(word: Word) {
