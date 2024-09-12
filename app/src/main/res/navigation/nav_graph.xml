@@ -15,11 +15,23 @@
     <fragment
         android:id="@+id/learnedFragment"
         android:name="com.example.englishmate.LearnedFragment"
-        android:label="LearnedFragment" />
+        android:label="LearnedFragment" >
+        <action
+            android:id="@+id/action_learnedFragment_to_learnedBottomSheet"
+            app:destination="@id/learnedBottomSheet" />
+    </fragment>
     <dialog
         android:id="@+id/wordBottomSheet"
         android:name="com.example.englishmate.WordBottomSheet"
         android:label="WordBottomSheet" >
+        <argument
+            android:name="Word"
+            app:argType="com.example.englishmate.Word" />
+    </dialog>
+    <dialog
+        android:id="@+id/learnedBottomSheet"
+        android:name="com.example.englishmate.LearnedBottomSheet"
+        android:label="LearnedBottomSheet" >
         <argument
             android:name="Word"
             app:argType="com.example.englishmate.Word" />

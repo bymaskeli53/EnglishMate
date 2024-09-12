@@ -3,6 +3,7 @@ package com.example.englishmate
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import com.example.englishmate.databinding.FragmentHomeBinding
 import com.google.gson.Gson
@@ -10,16 +11,20 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
+    private lateinit var preferenceHelper: PreferenceHelper
+
+    private lateinit var wordAdapter: WordAdapter
+
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentHomeBinding.bind(view)
+        preferenceHelper = PreferenceHelper(requireContext())
 
-
-        val wordList = loadWordsFromJson()
-        val wordAdapter = WordAdapter(wordList.words,{
+        val wordList = loadWordsFromJson().words.toMutableList()
+        wordAdapter = WordAdapter(wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.toMutableList(),{
             val action = HomeFragmentDirections.actionHomeFragmentToWordBottomSheet(it)
             findNavController().navigate(action)
         })
@@ -27,9 +32,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
         binding.swipeToRefresh.setOnRefreshListener {
-            val newList = wordList.words.shuffled()
+            val newList = wordList.shuffled()
             wordAdapter.setWordLists(newList)
             binding.swipeToRefresh.isRefreshing = false
+        }
+
+        setFragmentResultListener("learned_word"){_,bundle ->
+            val learnedWord = bundle.getParcelable<Word>("word")
+            if (learnedWord != null) {
+                removeWordFromList(learnedWord)
+            }
         }
     }
 
@@ -42,4 +54,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val gson = Gson()
         return gson.fromJson(jsonString, WordList::class.java)
     }
+
+    fun removeWordFromList(word: Word) {
+        wordAdapter.removeWord(word)
+    }
+
+    fun addWordToList(word: Word) {
+        wordAdapter.addWord(word)
+    }
+
+
 }

@@ -5,13 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.setFragmentResult
+import androidx.navigation.fragment.navArgs
 import com.example.englishmate.databinding.WordBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import androidx.navigation.fragment.navArgs
-import com.google.gson.Gson
 
-class WordBottomSheet : BottomSheetDialogFragment() {
+class LearnedBottomSheet : BottomSheetDialogFragment() {
     private var _binding: WordBottomSheetBinding? = null
 
     private val binding get() = _binding!!
@@ -33,21 +31,19 @@ class WordBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val word = navArgs.Word
+        binding.checkBox.text = "Unlearned"
         binding.tvBottomSheet.text = word.turkish
 
         preferenceHelper = PreferenceHelper(requireContext())
 
         binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                preferenceHelper.saveLearnedWord(word.english)
-                setFragmentResult("learned_word",Bundle().apply {
-                    putParcelable("word",word)
-                })
-//                preferenceHelper.saveLearnedWord(word.english)
-//                (parentFragment as? HomeFragment)?.removeWordFromList(word)
+                preferenceHelper.removeLearnedWord(word.english)
+                (parentFragment as? LearnedFragment)?.removeWordFromList(word)
+                (parentFragment as? HomeFragment)?.addWordToList(word)
                 dismiss()
             }
-    }
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
