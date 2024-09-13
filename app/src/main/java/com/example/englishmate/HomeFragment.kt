@@ -14,20 +14,24 @@ import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+
 class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var preferenceHelper: PreferenceHelper
     private lateinit var wordAdapter: WordAdapter
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
+    // HomeFragmentViewModel'i burada tanımlayın
+    private val viewModel: HomeFragmentViewModel by activityViewModels()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentHomeBinding.bind(view)
         preferenceHelper = PreferenceHelper(requireContext())
 
         val wordList = loadWordsFromJson().words.toMutableList()
-        val initialWordList = wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled()
+        val initialWordList = wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }
+
         wordAdapter = WordAdapter {
             val action = HomeFragmentDirections.actionHomeFragmentToWordBottomSheet(it)
             findNavController().navigate(action)
@@ -35,26 +39,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.rvWords.adapter = wordAdapter
         binding.rvWords.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        // İlk listeyi ayarla
-        wordAdapter.setWordLists(initialWordList)
+        // Eğer ViewModel'de liste boşsa shuffle yap, değilse var olan listeyi kullan
+        if (viewModel.shuffledWordList.isEmpty()) {
+            viewModel.shuffledWordList = initialWordList.shuffled()
+        }
+        wordAdapter.setWordLists(viewModel.shuffledWordList)
 
         // Swipe-to-refresh ile listeyi yenileme
         binding.swipeToRefresh.setOnRefreshListener {
-            val newList = wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled()
-           // val observer = object: RecyclerView.AdapterDataObserver(){
-//                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-//                    super.onItemRangeInserted(positionStart, itemCount)
-//                    binding.rvWords.scrollToPosition(0)
-//                    binding.rvWords.adapter?.unregisterAdapterDataObserver(this)
-//                }
-
-
-//            wordAdapter.registerAdapterDataObserver(observer)
-          //  wordAdapter.setWordLists(newList)
-            wordAdapter.submitList(newList){
+            viewModel.shuffledWordList = wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled()
+            wordAdapter.submitList(viewModel.shuffledWordList) {
                 binding.rvWords.scrollToPosition(0)
             }
-
             binding.swipeToRefresh.isRefreshing = false
         }
 
@@ -65,6 +61,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
+    private fun removeWordFromList(word: Word) {
+        val currentList = viewModel.shuffledWordList.toMutableList()
+        currentList.remove(word)
+        viewModel.shuffledWordList = currentList
+        wordAdapter.setWordLists(currentList)
+    }
+
     private fun loadWordsFromJson(): WordList {
         val inputStream = activity?.assets?.open("words.json")
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
@@ -73,11 +76,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val gson = Gson()
         return gson.fromJson(jsonString, WordList::class.java)
     }
-
-    private fun removeWordFromList(word: Word) {
-        val currentList = wordAdapter.currentList.toMutableList()
-        currentList.remove(word)
-        wordAdapter.setWordLists(currentList)
-    }
 }
+
 

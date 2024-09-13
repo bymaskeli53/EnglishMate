@@ -11,6 +11,9 @@
         <action
             android:id="@+id/action_homeFragment_to_wordBottomSheet"
             app:destination="@id/wordBottomSheet" />
+        <action
+            android:id="@+id/action_homeFragment_to_learnedFragment2"
+            app:destination="@id/learnedFragment" />
     </fragment>
     <fragment
         android:id="@+id/learnedFragment"
