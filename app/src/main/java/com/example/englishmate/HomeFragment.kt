@@ -1,10 +1,13 @@
 package com.example.englishmate
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.englishmate.databinding.FragmentHomeBinding
 import com.google.gson.Gson
@@ -13,7 +16,6 @@ import java.io.InputStreamReader
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var preferenceHelper: PreferenceHelper
-
     private lateinit var wordAdapter: WordAdapter
 
     override fun onViewCreated(
@@ -25,27 +27,41 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         preferenceHelper = PreferenceHelper(requireContext())
 
         val wordList = loadWordsFromJson().words.toMutableList()
-        wordAdapter = WordAdapter(wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled().toMutableList(),{
+        val initialWordList = wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled()
+        wordAdapter = WordAdapter {
             val action = HomeFragmentDirections.actionHomeFragmentToWordBottomSheet(it)
             findNavController().navigate(action)
-        })
+        }
         binding.rvWords.adapter = wordAdapter
+        binding.rvWords.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        binding.rvWords.layoutManager = layoutManager
+        // İlk listeyi ayarla
+        wordAdapter.setWordLists(initialWordList)
 
-
+        // Swipe-to-refresh ile listeyi yenileme
         binding.swipeToRefresh.setOnRefreshListener {
-            val newList = wordList.shuffled()
-            wordAdapter.setWordLists(newList)
+            val newList = wordList.filterNot { preferenceHelper.getLearnedWords().contains(it.english) }.shuffled()
+           // val observer = object: RecyclerView.AdapterDataObserver(){
+//                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+//                    super.onItemRangeInserted(positionStart, itemCount)
+//                    binding.rvWords.scrollToPosition(0)
+//                    binding.rvWords.adapter?.unregisterAdapterDataObserver(this)
+//                }
+
+
+//            wordAdapter.registerAdapterDataObserver(observer)
+          //  wordAdapter.setWordLists(newList)
+            wordAdapter.submitList(newList){
+                binding.rvWords.scrollToPosition(0)
+            }
+
             binding.swipeToRefresh.isRefreshing = false
         }
 
-        setFragmentResultListener("learned_word"){_,bundle ->
+        // Öğrenilen kelimeyi çıkarmak için listener
+        setFragmentResultListener("learned_word") { _, bundle ->
             val learnedWord = bundle.getParcelable<Word>("word")
-            if (learnedWord != null) {
-                removeWordFromList(learnedWord)
-            }
+            learnedWord?.let { removeWordFromList(it) }
         }
     }
 
@@ -54,18 +70,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
         val jsonString = bufferedReader.use { it.readText() }
 
-        // Gson ile JSON'u nesnelere dönüştür
         val gson = Gson()
         return gson.fromJson(jsonString, WordList::class.java)
     }
 
-    fun removeWordFromList(word: Word) {
-        wordAdapter.removeWord(word)
+    private fun removeWordFromList(word: Word) {
+        val currentList = wordAdapter.currentList.toMutableList()
+        currentList.remove(word)
+        wordAdapter.setWordLists(currentList)
     }
-
-    fun addWordToList(word: Word) {
-        wordAdapter.addWord(word)
-    }
-
-
 }
+

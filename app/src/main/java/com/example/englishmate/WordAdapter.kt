@@ -7,8 +7,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.englishmate.databinding.ItemWordsBinding
 
-class WordAdapter(var wordList: MutableList<Word>, val itemClick: (Word) -> Unit = {}) : RecyclerView.Adapter<WordAdapter.WordViewHolder>() {
-
+class WordAdapter(val itemClick: (Word) -> Unit = {}) :
+    ListAdapter<Word, WordAdapter.WordViewHolder>(WordDiffCallback()) {
 
     inner class WordViewHolder(val binding: ItemWordsBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -17,35 +17,29 @@ class WordAdapter(var wordList: MutableList<Word>, val itemClick: (Word) -> Unit
         return WordViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        return wordList.size
-    }
-
     override fun onBindViewHolder(holder: WordViewHolder, position: Int) {
-       holder.binding.tvWord.text = wordList[position].english
+        val word = getItem(position)
+        holder.binding.tvWord.text = word.english
         holder.binding.root.setOnClickListener {
-            itemClick(wordList[position])
+            itemClick(word)
         }
     }
 
     // Yeni kelime listesini ayarlamak için bir fonksiyon ekliyoruz
     fun setWordLists(newWordList: List<Word>) {
-        wordList = newWordList.toMutableList()
-        notifyDataSetChanged() // Liste güncellendiğini bildir
-    }
+        submitList(newWordList)
 
-    fun removeWord(word: Word) {
-        val position = wordList.indexOf(word)
-        if (position != -1) {
-            wordList.removeAt(position) // Kelimeyi listeden kaldır
-            notifyDataSetChanged() // RecyclerView'i güncelle
+
         }
     }
 
-    fun addWord(word: Word) {
-        wordList.add(word)
-        notifyItemInserted(wordList.size - 1)
+
+class WordDiffCallback : DiffUtil.ItemCallback<Word>() {
+    override fun areItemsTheSame(oldItem: Word, newItem: Word): Boolean {
+        return oldItem.english == newItem.english
     }
 
-
+    override fun areContentsTheSame(oldItem: Word, newItem: Word): Boolean {
+        return oldItem == newItem
+    }
 }

@@ -19,26 +19,33 @@ class LearnedFragment : Fragment(R.layout.fragment_learned) {
         val binding = FragmentLearnedBinding.bind(view)
         preferenceHelper = PreferenceHelper(requireContext())
 
-        val learnedWords = preferenceHelper.getLearnedWords().map { Word(it, it) }.toMutableList()
-        wordAdapter = WordAdapter(learnedWords) { word ->
-            // Unlearn işlemi
+        // Öğrenilen kelimeleri preference'dan alıyoruz
+        val learnedWords = preferenceHelper.getLearnedWords().map { Word(it, it) }
+
+        // WordAdapter'ı ayarlıyoruz
+        wordAdapter = WordAdapter { word ->
+            // Unlearn işlemi için BottomSheet'i açıyoruz
             val action = LearnedFragmentDirections.actionLearnedFragmentToLearnedBottomSheet(word)
             findNavController().navigate(action)
-           // removeWordFromList(word)
-            // Ana Fragment'a geri ekleme işlemi yapılabilir
-           // (parentFragmentManager.findFragmentById(R.id.homeFragment) as? HomeFragment)?.addWordToList(word)
         }
+
         binding.rvWords.adapter = wordAdapter
 
-        setFragmentResultListener("unlearned_word"){_,bundle ->
+        // İlk listeyi adapter'a ekliyoruz
+        wordAdapter.setWordLists(learnedWords)
+
+        // Unlearned işlemi yapıldığında kelimeyi listeden çıkarıyoruz
+        setFragmentResultListener("unlearned_word") { _, bundle ->
             val unlearnedWord = bundle.getParcelable<Word>("word2")
-            if (unlearnedWord != null) {
-                removeWordFromList(unlearnedWord)
-            }
+            unlearnedWord?.let { removeWordFromList(it) }
         }
     }
 
+    // Kelimeyi listeden çıkaran fonksiyon
     fun removeWordFromList(word: Word) {
-        wordAdapter.removeWord(word)
+        val currentList = wordAdapter.currentList.toMutableList()
+        currentList.remove(word)
+        wordAdapter.setWordLists(currentList)
     }
 }
+
