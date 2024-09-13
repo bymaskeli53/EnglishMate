@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.setFragmentResult
 import com.example.englishmate.databinding.WordBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -40,11 +41,12 @@ class WordBottomSheet : BottomSheetDialogFragment() {
         binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 preferenceHelper.saveLearnedWord(word.english)
+                Toast.makeText(requireContext(),"Word Learned",Toast.LENGTH_SHORT).show()
                 setFragmentResult("learned_word",Bundle().apply {
                     putParcelable("word",word)
                 })
-//                preferenceHelper.saveLearnedWord(word.english)
-//                (parentFragment as? HomeFragment)?.removeWordFromList(word)
+                preferenceHelper.saveLearnedWord(word.english)
+                (parentFragment as? HomeFragment)?.removeWordFromList(word)
                 dismiss()
             }
     }

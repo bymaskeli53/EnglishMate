@@ -40,8 +40,8 @@ class LearnedBottomSheet : BottomSheetDialogFragment() {
         binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 preferenceHelper.removeLearnedWord(word.english)
-                //(parentFragment as? LearnedFragment)?.removeWordFromList(word)
-               // (parentFragment as? HomeFragment)?.addWordToList(word)
+                (parentFragment as? LearnedFragment)?.removeWordFromList(word)
+                (parentFragment as? HomeFragment)?.addWordToList(word)
                 setFragmentResult("unlearned_word",Bundle().apply {
                     putParcelable("word2",word)
                 })

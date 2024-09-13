@@ -61,7 +61,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    private fun removeWordFromList(word: Word) {
+    fun removeWordFromList(word: Word) {
         val currentList = viewModel.shuffledWordList.toMutableList()
         currentList.remove(word)
         viewModel.shuffledWordList = currentList
@@ -75,6 +75,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         val gson = Gson()
         return gson.fromJson(jsonString, WordList::class.java)
+    }
+    fun addWordToList(word: Word) {
+        val currentList = viewModel.shuffledWordList.toMutableList()
+        currentList.add(word)
+        viewModel.shuffledWordList = currentList
+        wordAdapter.setWordLists(currentList)
     }
 }
 
